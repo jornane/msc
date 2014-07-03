@@ -1,0 +1,105 @@
+\documentclass{MScthesisITEM}
+
+\title{Traffic data processing using\newlinetitle large scale graph processing} % The title of your assignement; NB use \newlinetitle to start a newline
+\author{Yorin Anne de Jong} % Your firstname and lastname
+\professor{Yuming Jiang, ITEM} % Affiliation = ITEM for instance
+\supervisor{Gurvinder Singh, UNINETT}
+
+%% Uncomment the following in case you want subfigures; note that there will be a warning for the caption package
+% \let\subcaption\undefined
+% \let\subfloat\undefined
+% \usepackage[bf]{caption}
+% \usepackage{subcaption}
+\usepackage{lscape}
+
+\DeclareGraphicsExtensions{.pdf,.jpg,.png}
+\graphicspath{{./figs/}}
+
+\loadglsentries{glossary}
+\makeglossaries
+
+\begin{document}
+\selectlanguage{english}
+\pagenumbering{roman}
+\pagestyle{plain}
+
+%% Only for the project
+\titleITEM
+
+%% Only for the master's thesis; for the project report the description is taken from It's Learning and added by the department
+\selectlanguage{english} % Change to 'norsk' if you are writing in Norwegian
+\input{problem_description}
+\cleardoublepage
+
+%% There must be an abstract in English, even though the main text is in Norwegian
+\selectlanguage{english}
+\include{abstract_english}
+\cleardoublepage
+
+%% Only for the master's thesis; if the main text is in English and you can write Norwegian, there must be an abstract in Norwegian as well.A
+\selectlanguage{norsk}
+\include{abstract_norwegian}
+\cleardoublepage
+
+\selectlanguage{english}% Change to 'norsk' if you are writing in Norwegian
+
+\include{preface}
+\cleardoublepage
+
+% similarly you may add a separate acknowledgments page
+
+\tableofcontents*
+\cleardoublepage
+
+%% include if relevant
+\listoffigures
+\cleardoublepage
+
+%% include if relevant
+\listoftables
+\cleardoublepage
+
+%% include if relevant
+\listofalgorithms
+\addcontentsline{toc}{chapter}{List of Algorithms}
+\cleardoublepage
+
+%% include if relevant
+\printglossary[title=List of Terms, style=long]
+\cleardoublepage
+\glsaddall[]
+
+%% include if relevant
+\printglossary[title=List of Acronyms,type=\acronymtype] % prints just the list of acronyms
+\cleardoublepage
+
+\pagenumbering{arabic}
+\pagestyle{ruled}
+\include{introduction} % introduction
+\include{netflow} % description of the NetFlow format
+\include{graph} % description of the graph structure
+\include{traffic} % how NetFlow traffic can be represented as a graph
+\include{anomalies} % possible anomalies
+\include{dosrank} % DOSRank proof of concept
+\include{spreadrank} % SpreadRank algorithm
+\include{results} % Findings (and performance)
+\include{conclusion} % Conclusion
+
+\renewcommand*{\bibname}{References}
+\bibliographystyle{plain}
+\bibliography{main}
+
+%% Uncomment the following if you have any appendix
+\appendix
+\addtocontents{toc}{%
+ \protect\vspace{1em}% 
+ \protect\noindent \bfseries \appendixtocname\protect\par
+ \protect\vspace{-.5em}%
+}
+\renewcommand{\chaptername}{\appendixname}
+%% include below possible appendices (chapters)
+\include{commands}
+\include{diagram}
+
+
+\end{document} 

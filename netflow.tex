@@ -1,0 +1,66 @@
+\chapter{NetFlow}
+\label{chp:netflow}
+
+\section{Format}
+The traffic data provided by UNINETT is stored in the NetFlow File Format~\cite{cisco0netflow}.
+This format contains of flows, which are data units consisting layer 3 and 4~\cite{zimmermann1980osi} information,
+ for example IP addresses, transport protocol and port numbers where applicable.
+NetFlow can be converted to human readable text using the \verb"nfdump" program\footnote{http://nfdump.sourceforge.net}.
+
+\section{Available information}
+%Apart from multicast and broadcast flows, flows are always between two hosts.
+%The NetFlow information is logged by UNINETT's core routers, so only traffic that passes through these core routers is logged.
+%Flows that are not logged are (1) communication in LANs and (2) communication on the open internet between hosts that have no affiliation with UNINETT.
+%This means that (1) spreading of malware within a LAN, or organisation, is not detected and neither is (2) malware spreading on the internet outside of the Norwegian academic institutions.
+%
+%Using a list of IP addresses assigned to UNINETT and organisations peering through UNINETT, it is possible to know which hosts can be well observed (all communication with the internet is observed) and which %hosts cannot be well observed (only communication with a well observed host is observed).
+%The thesis focuses mainly on hosts that can be well observed.
+%
+%\subsection{Observable traffic}
+NetFlow data is logged on the routers, which means that only traffic that passes through these routers is observable.
+UNINETT peers with most Norwegian education institutions, but these institutions generally will have their own routers.
+This means that UNINETT can only observe traffic that happens between institutions, or between institutions and machines on the outside.
+In other words, traffic that happens within an institution is not observable for UNINETT.
+%Although there exists malware with very specific targets~\cite{langner2011stuxnet}, most known malware targets any vulnerable host on the internet it can find.
+%Because of this, it is expected that most malware traffic will be observable from the NetFlow data.
+
+Figure~\ref{fig:nodes} shows some end-hosts in different networks, and some flows between them.
+The figure shows how only flows that go through UNINETT's core routers will show up in the NetFlow log.
+Flows that happen within an organisation will never pass through UNINETT's core routers, even though the organisation is connected to the internet through UNINETT.
+Flows completely outside UNINETT's core network are not logged either, naturally.
+Flows that are between one end-host at an organisation connected through UNINETT (for example \gls{ntnu}), and one end-host in another organisation, can be logged by one of UNINETT's core routers, because the traffic must pass through these routers.
+
+\begin{figure}[h!]
+	\caption{Illustration of which flows are logged}
+	\label{fig:nodes}
+	\centering
+		\includegraphics[width=0.5\textwidth]{nodes}
+\end{figure}
+
+
+\section{Direction}
+\label{sec:direction}
+
+Flows are between a source and destination IP address.
+However, one TCP or UDP session will usually be observed as multiple flows,
+ due to NetFlow being logged by layer 3~\cite{zimmermann1980osi} routers.
+In order to observe spreading, it is important to know which host initiated the connection.
+A simple solution would be to take the first flow between two hosts, and merge with all subsequent flows that are between the same IP addresses and port numbers,
+ until a time-out occurs.
+However, for performance reasons, UNINETT makes use of sampled NetFlow, which means that only 1~\% of all the packets are logged.
+This makes it harder to reliably establish which party initiated a connection,
+ as the first observed flow may actually be in the opposite direction from the actual first flow.
+
+TCP and UDP are layer 4~\cite{zimmermann1980osi} protocols which offer end-to-end communication between end-hosts.
+In order to allow end-hosts to run multiple services, these protocols use a two byte \emph{port number} to indicate the type of service.
+In order to set up a TCP or UDP connection, a client must first select a port number at random.
+This port is called the \emph{\gls{ephemeral port}}, and its range differs per operating system, but it is never lower than 1024.
+The client will then send an initial packet to the server, from the \emph{\gls{ephemeral port}}, to the \emph{\gls{contact port}}.
+The \emph{\gls{contact port}} will often be a \emph{\gls{well-known port}}, which is a port number under 1024.
+The list of \gls{well-known port}s is maintained by IANA~\cite{rfc1700}.
+
+The direction can therefore be assumed to be initiated by the party with the lowest port number.
+Because there is some overlap in \emph{\gls{contact port}s} over 1024 and \emph{\gls{ephemeral port}s},
+ flows with \emph{\gls{contact port}s} equal to or higher than 1024 are disregarded.
+Additionally, protocols without a port number are disregarded.
+

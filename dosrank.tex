@@ -1,0 +1,69 @@
+\chapter{DOSRank}
+\label{chp:dosrank}
+
+To test Giraph, two simple algorithms, DOSRank and ReverseDOSRank are created, which count the amount of respectively incoming and outgoing edges from or to a vertex.
+This proof of concept will count the amount of flows per \gls{service}.
+It can be used to detect if a machine is executing or suffering from a DoS attack,
+ as these are typically identified by a large number of flows.
+These two algorithms will count respectively the amount of outgoing and the amount of incoming edges.
+DOSRank (equation~\ref{eq:dosrank}, algorithm~\ref{alg:dosrank}), which will calculate outgoing edges (incoming connections) is trivial; it will set its value during the first superstep and vote to halt.
+ReverseDOSRank (equation~\ref{eq:reversedosrank}, algorithm~\ref{alg:reversedosrank}) is a bit more complex;
+ since incoming edges are not visible in Giraph, the first superstep is used to send a message over every edge.
+During the second superstep, every vertex will receive an amount of messages that is equal to its amount of incoming edges.
+
+
+\begin{equation}
+	\label{eq:dosrank}
+	f(x) = N^{-}(x).
+\end{equation}
+\begin{equation}
+	\label{eq:reversedosrank}
+	f(y) = N^{+}(y).
+\end{equation}
+
+\begin{algorithm}[H]
+	\label{alg:dosrank}
+	\caption{DOSRank}
+	\begin{verbatim}
+	result = vertex.getNumEdges();
+	vertex.voteToHalt();
+	\end{verbatim}
+\end{algorithm}
+\begin{algorithm}[H]
+	\label{alg:reversedosrank}
+	\caption{ReverseDOSRank}
+	\begin{verbatim}
+	if superstep = 0 then
+	begin
+	    result = 0;
+	    sendMessageToAllEdges();
+	end
+	else
+	begin
+	    while(messages.hasNext)
+	    do
+	        message.next();
+	        result++;
+	    end;
+	    vertex.voteToHalt();
+	end.
+	\end{verbatim}
+\end{algorithm}
+
+\section{Expected results}
+The algorithm will find IP addresses that are associated with large amounts of flows.
+Opening a large amount of flows is different from sending large amounts of data,
+ as sending a large amount of data is often a completely legitimate thing to do:
+For example, sharing files via peer-to-peer protocols or serving large files over HTTP.
+A large amount of flows, however, may be an indication that something is amiss.
+It can indicate port scanning, or even targeted attacks like SYN flooding.
+However, a large amount of flows can also simply indicate a very active or popular host.
+
+\section{Purpose}
+These algorithms are just a proof-of-concept to show that graph systems can be used for traffic analysis.
+The algorithm itself is most likely easier to implement using other systems.
+A simple MapReduce algorithm could probably yield the same results a smaller amount of time~\cite{Morken352472}.
+However, this algorithm does show that Giraph can be used for traffic analysis,
+ and it opens the door for more complex algorithms, like SpreadRank.
+
+

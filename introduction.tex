@@ -1,0 +1,84 @@
+\chapter{Introduction}
+\label{chp:introduction} 
+
+The internet today is a very important communication network.
+Nearly everybody is connected to it, many are dependent on it,
+ and the possibilities are virtually endless.
+The applications range from looking at pictures of cats, to high intensity stock trading and remote surgeries.
+However, not all these applications are well intended towards other internet users.
+Criminals write malware that will send spam and spy people's computers to look for credit card information.
+Activists use botnets to bombard sites they don't like, in order to make them unavailable.
+
+Internet providers want to block clients that participate in harmful activity,
+ but this is no simple task.
+The amount of traffic that passes through a back bone router is huge,
+ and special provisions need to be in place to log this.
+Cisco is a large supplier of router hardware, and they have introduced the NetFlow format~\cite{cisco0netflow}.
+NetFlow data does need to be stored an processed, for which methods are currently available~\cite{Morken352472}.
+However, in order to process NetFlow data, one must know what to look for.
+
+Current software is based on counting flows.
+A relatively high number of flows in a short period of time is reason for alarm,
+ and a high number of flows for a single IP address may be a reason to investigate.
+The challenge here is that a high number of flows does not necessarily indicate a problem,
+ which may lead to false positives, which may lead to the raising of the minimal amount of flows for alarm.
+
+
+\section{Anomaly detection}
+An anomaly is a non-conforming pattern~\cite{Chandola:2009:ADS:1541880.1541882}.
+There are multiple methods to detect anomalous traffic.
+%Different devices on a network generate traffic for many different reasons.
+%Some traffic is benign, some traffic is malicious.
+%Some examples of are: \emph{web browsing}, \emph{e-mail}, \emph{software updates}, \emph{torrents}, \emph{VPN tunnels}, \emph{SSH tunnels}, \emph{port scans}, \emph{spamming}, \emph{(D)DoS attacks} and \emph{infecting other hosts}.
+%However, when observing network traffic, the only kinds of anomalies that can be observed from first glance are
+It is possible to detect high or low resource consumption~\cite{lan2003effect}, standards-conforming or non-standards-conforming packets~\cite{john2008detection}, or asymmetric traffic which should be symmetric~\cite{kreibich2005using}.
+However, these anomalies do not necessary indicate malicious activity.
+Non-standard packets may be sent between hosts running legacy and/or proprietary software,
+asymmetric traffic may be caused by network scanning tools, improperly configured firewalls or IP spoofing,
+and high-rate traffic can just as well indicate a popular server, as an attack~\cite{gao2006differentiating}.
+
+%This thesis introduces the SpreadRank algorithm,
+% which will provide additional metrics to judge an IP address on.
+%It will use NetFlow data to determine if traffic is repeated by other end-hosts,
+% in other words, when an end-host receives a connection, it will see if this host starts initiating the same kind of connection to other end-hosts.
+This thesis will focus on spreading of traffic as an anomaly, as malicious traffic will want to spread as far as possible,
+ while bona fide traffic will often remain between two hosts.
+To illustrate: a criminal who created malware that steals credit cards will want it installed on as many computers as possible.
+The owner of a botnet will want as many computers as possible to join it.
+An end user sending an e-mail or doing online banking, however, will want this information to be only available to the intended recipients.
+
+
+\section{Graph processing}
+Graph processing is often associated with data mining, due to Facebook actively working on the technology~\cite{ching2013scaling} to mine social data,
+ but it has a lot of different uses.
+Some examples are navigation (roads as edges), financial (currency flow), the internet (Google pagerank~\cite{page1999pagerank}) and rumour spreading~\cite{nekovee2007theory}.
+This thesis will use graphs to process network data from NetFlow, which is a graph that shows information flow.
+
+The NetFlow data will be provided by UNINETT, which administers the core routers in the Norwegian academic network.
+Backbone NetFlow traffic is typically hundreds of megabytes to gigabytes of flow data per day.
+By observing a large network, it is possible to look for patterns;
+ observing individual network nodes may give some indication of what kind of traffic is being sent,
+ but observing the interaction between many different hosts can show information that is not visible by only observing a few hosts.
+
+
+\section{Privacy}
+This thesis is based on sampled NetFlow data over December 2013 made available by UNINETT.
+NetFlow data contains, among others, source IP, destination IP, protocol, and time, but no payload information.
+Sampled NetFlow means that not everything is logged, UNINETT logs about~1~\% of flows, this is done for performance and storage reasons.
+Even though no payload information was made available for this study, payload information can be helpful when identifying traffic.
+Techniques exist to use payload information without infringing on privacy~\cite{parekh2006privacy}.
+
+
+%\section{Previous work}
+%Earlier research has focussed on the MapReduce model for processing graph data~\cite{Morken352472}.
+%
+%
+%A similar study compares computer viruses to biological viruses~\cite{pastor2001epidemic},
+% it focuses on the spread/recovery rates of computer viruses.
+%The study does not focus on graph based systems
+%This study will not focus on virus infections, but it will look at the spreading of traffic on the internet.
+%
+
+% "Hadoop~\cite{Borthakur:2011:AHG:1989323.1989438}"
+
+
