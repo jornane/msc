@@ -5,7 +5,7 @@ This thesis has stated the current practices in traffic anomaly detection.
 Current traffic anomaly detection is based on aggregating flows,
  or by identifying high-intensity traffic.
 The thesis defines the concept of spreading,
- which describes the phenomenon of an end-host initiating the same kind of connections it receives,
+ which describes the phenomenon of a host initiating the same kind of connections it receives,
  where same-kind refers to usage of the same TCP/UDP ports.
 It is argued that spreading is uncommon for most protocols on the internet today, which makes it an anomaly.
 
@@ -21,28 +21,29 @@ Every service is scored on its longest path towards another service (\gls{depth}
  and on how far it spreads its traffic (\gls{spreading}).
 
 An analysis of the results shows that only five percent of all \emph{\gls{service}s} participate in \emph{\gls{spreading}},
- and that for most end-hosts their role can be determined by simply looking at their spreading.
-A spreading of zero typically indicates a server, one typically indicates a client (its traffic reaches to the servers) and a spreading of two often indicates a hybrid, but it can also indicate a simple proxy server.
+ and that for many hosts, their role can be determined by simply looking at their spreading.
+A spreading of zero typically indicates a server, one typically indicates a client (its traffic reaches to the servers) and a spreading of two often indicates a combination of both, though it can also indicate a simple proxy server.
 
 Some protocols have natural spreading, for example \gls{BGP}, \gls{DNS} and \gls{SMTP};
- implementations of these protocols are often both server and client.
-\Gls{SSH} and \gls{HTTP} are popular protocols which do not have natural spreading,
- but do exhibit spreading nevertheless.
+ implementations of these protocols behave often both as server and client.
+\Gls{SSH} and \gls{HTTP} are popular protocols which do not have natural spreading;
+ however, these protocols exhibit spreading nevertheless.
 \Gls{HTTP} has a high \gls{spreading} due to it being a protocol that is used for multiple purposes.
 An \gls{HTTP} \gls{service} may itself use \gls{HTTP} to connect to another \gls{service}.
 \Gls{SSH} allows users to ``hop'' from one SSH server to another.
-Additionally, many home servers will listen on these ports.
+
 
 SpreadRank has been successful in identifying spreading, and in doing so can be successfully used to find DNS resolvers,
  BGP routers and mail servers on the network.
+It has also been successful in finding hosts that participated in a botnet.
 It does so based on NetFlow data from core routers, without sending data into the network itself.
 
 \section{Future work}
 \subsection{Automation}
-The current implementation of SpreadRank requires the analyst to provide many manual steps.
-A better EdgeInputReader would reduce the amount of conversions needed,
+The current implementation of SpreadRank requires the analyst to execute many manual steps.
+A better \verb"EdgeInputFormat" would reduce the amount of conversions needed,
  and speed up the overall process.
-The output could be parsed to automatically find outliers.
+The output could then be parsed to automatically find outliers.
 
 \subsection{Test-data}
 It was not known beforehand which attacks were present in the test-data.
@@ -56,7 +57,7 @@ For a real-life application, real-time monitoring is required,
 In order to work with real-time data, a sliding window is required,
  in which flows are added to the graph as they are observed,
 and old flows are removed.
-Giraph does not currently support this, but systems that support this do exist, for example GraphX.
+Giraph does not currently support this; however, systems that support this do exist, for example GraphX.
 
 \subsection{IPv6}
 The NetFlow data provided by UNINETT contains only flows between IPv4 hosts.
@@ -67,6 +68,6 @@ Where many home servers currently share their public IPv4 address with clients d
  IPv6 makes it possible to run the server and client on different IPv6 addresses.
 
 Additionally, the use of privacy extensions in IPv6 (a technology that lets clients randomise their IP address for anonymity) will prove to be both a challenge and an advantage for SpreadRank.
-It is a challenge because it will lead to more vertices; in the current model every observed IP address + port number is a vertex, which means that a new vertex is created every time a client switches IP address.
+It is a challenge because it will lead to more vertices; in the current model, every observed IP address + port number pair is a vertex, which means that a new vertex is created every time a client switches IP address.
 Randomised IP addresses are also an advantage, because it is not feasible to run a server on a randomised IP address.
 This may make it easier to designate vertices as clients at a very early stage, which reduces computation time.

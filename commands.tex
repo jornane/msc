@@ -7,13 +7,13 @@ This appendix will show the commands used to convert NetFlow to \gls{csv},
  start SpreaRank with these \gls{csv} files,
  and filter the results.
 
+\newpage
 \section{Convert NetFlow to CSV}
 NetFlow can be converted to a \gls{csv} file, with non-UDP and non-TCP flows filtered out, as well as flows between port numbers that are both over 1024.
-This conversion is done using FlowConvert.sh, but in order to generate separate \gls{csv} files, FlowConvert must be run for each timeframe that a \gls{csv} file should span.
+This conversion is done using FlowConvert.sh, though in order to generate separate \gls{csv} files, FlowConvert must be run for each time frame that a \gls{csv} file should span.
 This snippet of \gls{bash} code will run FlowConvert.sh 31 times, for every day of the month.
 The end result will be a directory named \verb"trd_gw1_12_filtered.csv" with 31 files.
 
-\subsection{NetflowCSVEdgeInputFormat.java}
 \begin{verbatim}
 	seq 1 9 | while read nr
 	do
@@ -25,10 +25,14 @@ The end result will be a directory named \verb"trd_gw1_12_filtered.csv" with 31 
 	done
 \end{verbatim}
 
+\newpage
 \section{Execute SpreadRank}
 In order to execute SpreadRank on YARN,
- YARN must be started with the SpreadRank jarfile,
- and the full qualified class-name of the computation class.
+ the application must be submitted to the YARN manager,
+ so that it can deploy the SpreadRank jar file to all workers.
+The command takes as arguments the path of the jar file,
+ and the fully qualified class-name of both Giraph.
+Giraph takes the fully qualified class-name of the SpreadRank computation class.
 Additionally, a format for reading the graph at the start, and writing the graph at the end must be provided.
 In this case, we use a directory to store the graph data.
 The directory contains chunks of the full graph.
@@ -46,5 +50,43 @@ The directory contains chunks of the full graph.
 	 -yj giraph-rank-1.1.0-SNAPSHOT-for-hadoop-2.3.0-cdh5.0.1-jar-with-dependencies.jar
 \end{verbatim}
 
+
+\newpage
+\section{Filter results}
+The raw results from SpreadRank, even though outputted by a custom \verb"OutputFormat", contain a lot of information that is not relevant.
+This simple \gls{bash} script will remove all vertices with a \gls{depth} of 1 or less, and all vertices with no spreading or no clients.
+The program is built using these components:
+\begin{itemize}[label={$\bullet$}]
+\item \verb"cat": concatenate all parts of the output
+\item \verb"grep": filter out all values equal to 0 or 1
+\item \verb"sort": make sure that the highest spreading is returned first
+\item \verb"sed": anonymize the results by removing IP addresses though keeping port numbers
+\item \verb"less": easier reading of the results in a terminal
+\end{itemize}
+Components can taken out if desired, to change the results.
+Total execution time of this command on one month worth of NetFlow data took about 10\~15~seconds on UNINETT's server cluster.
+
+\begin{verbatim}
+cat rank-out/IPSpreadRank_gw1_12/part-m-* | egrep -vw '[01]' | sort -hrk 3 | sed 's/^.*://' | less
+\end{verbatim}
+
+\newpage
+\section{Aggregate}
+This \gls{bash} script can be used to determine how often a protocol engages in spreading.
+It will output two numbers per line, the second being the protocol number, the first being the amount of services observed.
+The program is built using these components:
+\begin{itemize}[label={$\bullet$}]
+\item \verb"cat": concatenate all parts of the output
+\item \verb"grep": filter out all values equal to 0 or 1
+\item \verb"sed": remove IP addresses, otherwise the list would show all IP addresses with count 1
+\item \verb"cut": remove all but the first value (port number)
+\item \verb"sort": set the port numbers in order, required for \verb"uniq".
+\item \verb"uniq": aggregate the port numbers, and show count
+\end{itemize}
+Total execution time of this command on one month worth of NetFlow data took about 10\~15~seconds on UNINETT's server cluster.
+
+\begin{verbatim}
+cat rank-out/IPSpreadRank_gw1_12/part-m-* | egrep -vw '[01]' | sed 's/^.*://' | cut -f1 | sort | uniq -c
+\end{verbatim}
 
 \end{landscape}
